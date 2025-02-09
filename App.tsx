@@ -1,118 +1,65 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, {useEffect, useState} from 'react';
+import {View, Text, Alert, BackHandler} from 'react-native';
+// import CodePush from '@chlee1001/react-native-code-push';
+import {version as currentVersion} from './package.json';
+import CodePush from '@chlee1001/react-native-code-push';
+import Snackbar from './src/components/common/snackbar';
+// import Snackbar from './src/components/common/snackbar.tsx';
+// import CodePush from '@chlee1001/react-native-code-push';
+// import { useCodePush } from './src/hooks/useCodePush.ts';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const App: React.FC = () => {
+  const [snackbarVisible, setSnackbarVisible] = useState(true);
+  // const {isUpdateDownloaded} = useCodePush();
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  // useEffect(() => {
+  //   if (isUpdateDownloaded) {
+  //     setSnackbarVisible(true);
+  //   }
+  // }, [isUpdateDownloaded]);
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  // Press the back button to exit the app
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert('알림', '앱 종료', [
+        {
+          text: '취소',
+          onPress: () => null,
+          style: 'cancel',
+        },
+        {text: '확인', onPress: () => BackHandler.exitApp()},
+      ]);
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+    return () => backHandler.remove();
+  }, []);
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View
+      style={{
+        height: '100%',
+        display: 'flex',
+        alignContent: 'center',
+        justifyContent: 'center',
+      }}>
+      <Text>{`Helllo! Cenk this is code push example app.\n${currentVersion}\n`}</Text>
+
+      <Snackbar
+          visible={snackbarVisible}
+          message="The app has been updated. Please restart to apply changes."
+          onDismiss={() => setSnackbarVisible(false)}
+          actionLabel="Restart"
+          onActionPress={() => CodePush.restartApp()}
+          autoHide={false}
+          swipeToDismiss
+      />
     </View>
   );
-}
+};
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
-
-export default App;
+export default CodePush({checkFrequency: CodePush.CheckFrequency.MANUAL})(App);
+// export default App;

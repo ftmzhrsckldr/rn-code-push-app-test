@@ -7,13 +7,17 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "pod-install": "cd ios && bundle exec pod deintegrate && bundle exec pod install",
+    "pod-install-old": "cd ios && bundle exec pod deintegrate && RCT_NEW_ARCH_ENABLED=0 bundle exec pod install"
   },
   "dependencies": {
     "react": "18.3.1",
-    "react-native": "0.77.0"
+    "@chlee1001/react-native-code-push": "^10.0.3",
+    "react-native": "~0.76.7"
   },
   "devDependencies": {
+    "react-native-iphone-screen-helper": "2.1.2",
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
