@@ -13,10 +13,18 @@ const App: React.FC = () => {
   // const {isUpdateDownloaded} = useCodePush();
 
   useEffect(() => {
-    if (isUpdateDownloaded) {
-      setSnackbarVisible(true);
-    }
-  }, [isUpdateDownloaded]);
+    CodePush.sync(
+      {
+        installMode: CodePush.InstallMode.ON_NEXT_RESTART,
+      },
+      (syncStatus) => {
+        // Güncelleme yüklendiyse snackbar'ı göster
+        if (syncStatus === CodePush.SyncStatus.UPDATE_INSTALLED) {
+          setSnackbarVisible(true);
+        }
+      }
+    );
+  }, []);
 
   // Press the back button to exit the app
   useEffect(() => {
