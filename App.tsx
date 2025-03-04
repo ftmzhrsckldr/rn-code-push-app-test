@@ -12,11 +12,11 @@ const App: React.FC = () => {
   const [snackbarVisible, setSnackbarVisible] = useState(true);
   // const {isUpdateDownloaded} = useCodePush();
 
-  // useEffect(() => {
-  //   if (isUpdateDownloaded) {
-  //     setSnackbarVisible(true);
-  //   }
-  // }, [isUpdateDownloaded]);
+  useEffect(() => {
+    if (isUpdateDownloaded) {
+      setSnackbarVisible(true);
+    }
+  }, [isUpdateDownloaded]);
 
   // Press the back button to exit the app
   useEffect(() => {
@@ -46,7 +46,7 @@ const App: React.FC = () => {
         alignContent: 'center',
         justifyContent: 'center',
       }}>
-      <Text>{`Helllo! Cenk this is code push example app.\n${currentVersion}\n`}</Text>
+      <Text>{`Helllo! Buraya bakarlar CodePush Test Againasdasdasdasdasdaasde23442s.\n${currentVersion}\n`}</Text>
 
       <Snackbar
           visible={snackbarVisible}
