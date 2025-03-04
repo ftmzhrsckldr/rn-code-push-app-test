@@ -54,7 +54,7 @@ const App: React.FC = () => {
         alignContent: 'center',
         justifyContent: 'center',
       }}>
-      <Text>{`Helllo! buraya da bakarlar ama sen resetle.\n${currentVersion}\n`}</Text>
+      <Text>{`Helllo! buraya da bakarlar ama sen resetleasdasdasd.\n${currentVersion}\n`}</Text>
 
       <Snackbar
           visible={snackbarVisible}
