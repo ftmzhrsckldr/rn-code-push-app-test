@@ -9,7 +9,7 @@ import Snackbar from './src/components/common/snackbar';
 // import { useCodePush } from './src/hooks/useCodePush.ts';
 
 const App: React.FC = () => {
-  const [snackbarVisible, setSnackbarVisible] = useState(true);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
   // const {isUpdateDownloaded} = useCodePush();
 
   useEffect(() => {
@@ -54,7 +54,7 @@ const App: React.FC = () => {
         alignContent: 'center',
         justifyContent: 'center',
       }}>
-      <Text>{`Helllo! Buraya bakarlar CodePush Test Againasdasdasdasdasdaasde23442s.\n${currentVersion}\n`}</Text>
+      <Text>{`Helllo! buraya da bakarlar ama sen resetle.\n${currentVersion}\n`}</Text>
 
       <Snackbar
           visible={snackbarVisible}
