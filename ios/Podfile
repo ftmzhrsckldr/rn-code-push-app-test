@@ -1,8 +1,14 @@
+# Resolve react_native_pods.rb with node to allow for hoisting
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "react-native/scripts/react_native_pods.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
+
 platform :ios, '15.5'
 
-# react-native pods dosyasını doğrudan require ediyoruz.
-require_relative '../node_modules/react-native/scripts/react_native_pods'
-require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+# RN 0.67'de prepare_react_native_project! metodu kullanılmıyor, bu yüzden kaldırıyoruz.
+# prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
@@ -11,11 +17,11 @@ if linkage != nil
 end
 
 target 'RNCodepushTest' do
-  config = use_native_modules!
+  # Manuel olarak reactNativePath bilgisini tanımlıyoruz.
+  config = { "reactNativePath" => "../node_modules/react-native" }
 
   use_react_native!(
-    :path => config[:reactNativePath],
-    # Uygulamanızın kök dizinine mutlak yol belirtir.
+    :path => config["reactNativePath"],
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
@@ -24,7 +30,7 @@ target 'RNCodepushTest' do
   post_install do |installer|
     react_native_post_install(
       installer,
-      config[:reactNativePath],
+      config["reactNativePath"],
       :mac_catalyst_enabled => false
     )
   end
