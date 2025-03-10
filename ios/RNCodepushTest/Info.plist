@@ -48,6 +48,8 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>CodePushDeploymentKey</key>
-	<string>eO--yguuyKlipG5b1ooFfio6zCmIdgVZF6orGs</string>
+	<string>dk_0t0JjZN4IfN04ojJM6K4ZA2N1ri4pcohs2oam9fjugobzww61yke</string>
+	<key>CodePushServerURL</key>
+	<string>https://codepush.cenkce.com</string>
 </dict>
 </plist>

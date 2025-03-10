@@ -54,7 +54,7 @@ const App: React.FC = () => {
         alignContent: 'center',
         justifyContent: 'center',
       }}>
-      <Text>{`Rollback öncesi codepush testNew.\n${currentVersion}\n`}</Text>
+      <Text>{`CodePush New Server Test.\n${currentVersion}\n`}</Text>
 
       <Snackbar
           visible={snackbarVisible}
