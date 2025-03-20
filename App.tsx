@@ -54,7 +54,7 @@ const App: React.FC = () => {
         alignContent: 'center',
         justifyContent: 'center',
       }}>
-      <Text>{`CodePush New Server Test.\n${currentVersion}\n`}</Text>
+      <Text>{`20.03.25 tarihindeki codepush test için build.\n${currentVersion}\n`}</Text>
 
       <Snackbar
           visible={snackbarVisible}
