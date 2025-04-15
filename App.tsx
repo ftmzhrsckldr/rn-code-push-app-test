@@ -1,73 +1,91 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, Alert, BackHandler} from 'react-native';
-// import CodePush from '@chlee1001/react-native-code-push';
-import {version as currentVersion} from './package.json';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, StatusBar, View, StyleSheet, LogBox } from 'react-native';
 import CodePush from '@chlee1001/react-native-code-push';
+import Navigation from './src/navigation';
+import { colors } from './src/theme/colors';
 import Snackbar from './src/components/common/snackbar';
-// import Snackbar from './src/components/common/snackbar.tsx';
-// import CodePush from '@chlee1001/react-native-code-push';
-// import { useCodePush } from './src/hooks/useCodePush.ts';
+import { analyticsService } from './src/utils/analytics';
+import { featureFlagsService } from './src/utils/featureFlags';
+
+// Ignore specific LogBox warnings
+LogBox.ignoreLogs([
+  'VirtualizedLists should never be nested',
+  'Warning: componentWillReceiveProps has been renamed',
+]);
 
 const App: React.FC = () => {
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  // const {isUpdateDownloaded} = useCodePush();
+  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
+  const [updateMessage, setUpdateMessage] = useState<string>(
+    'The app has been updated. Please restart to apply changes.'
+  );
 
   useEffect(() => {
+    // Initialize analytics
+    analyticsService.startNewSession();
+    analyticsService.setEnabled(featureFlagsService.isEnabled('enableAnalytics'));
+    analyticsService.trackEvent('app_launched');
+
+    // Check for CodePush updates
     CodePush.sync(
       {
         installMode: CodePush.InstallMode.ON_NEXT_RESTART,
       },
       (syncStatus) => {
-        // Güncelleme yüklendiyse snackbar'ı göster
         if (syncStatus === CodePush.SyncStatus.UPDATE_INSTALLED) {
+          setUpdateMessage('The app has been updated. Please restart to apply changes.');
           setSnackbarVisible(true);
         }
       }
     );
-  }, []);
 
-  // Press the back button to exit the app
-  useEffect(() => {
-    const backAction = () => {
-      Alert.alert('알림', '앱 종료', [
-        {
-          text: '취소',
-          onPress: () => null,
-          style: 'cancel',
-        },
-        {text: '확인', onPress: () => BackHandler.exitApp()},
-      ]);
-      return true;
+    // Check update status
+    const checkUpdateStatus = async () => {
+      try {
+        const update = await CodePush.getUpdateMetadata();
+        if (update) {
+          analyticsService.trackEvent('codepush_update_status', {
+            label: update.label,
+            description: update.description,
+            isFirstRun: update.isFirstRun,
+          });
+        }
+      } catch (error) {
+        console.error('Error checking update status:', error);
+      }
     };
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-    return () => backHandler.remove();
+
+    checkUpdateStatus();
   }, []);
 
   return (
-    <View
-      style={{
-        height: '100%',
-        display: 'flex',
-        alignContent: 'center',
-        justifyContent: 'center',
-      }}>
-      <Text>{`20.03.25 tarihindeki codepush test için build.\n${currentVersion}\n`}</Text>
-
-      <Snackbar
-          visible={snackbarVisible}
-          message="The app has been updated. Please restart to apply changes."
-          onDismiss={() => setSnackbarVisible(false)}
-          actionLabel="Restart"
-          onActionPress={() => CodePush.restartApp()}
-          autoHide={false}
-          swipeToDismiss
+    <SafeAreaView style={styles.container}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={colors.background}
       />
-    </View>
+      <Navigation />
+      
+      <Snackbar
+        visible={snackbarVisible}
+        message={updateMessage}
+        onDismiss={() => setSnackbarVisible(false)}
+        actionLabel="Restart"
+        onActionPress={() => CodePush.restartApp()}
+        autoHide={false}
+        swipeToDismiss
+      />
+    </SafeAreaView>
   );
 };
 
-export default CodePush({checkFrequency: CodePush.CheckFrequency.MANUAL})(App);
-// export default App;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+});
+
+export default CodePush({
+  checkFrequency: CodePush.CheckFrequency.ON_APP_START,
+  installMode: CodePush.InstallMode.ON_NEXT_RESTART,
+})(App);
