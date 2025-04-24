@@ -32,8 +32,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       (syncStatus) => {
         if (syncStatus === CodePush.SyncStatus.UPDATE_INSTALLED) {
           setSnackbarVisible(true);
-        } else if (syncStatus === CodePush.SyncStatus.AVAILABLE_UPDATE) {
-          setUpdateAvailable(true);
         }
       }
     );
@@ -45,7 +43,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       setTimeout(() => {
         Alert.alert(
           'New Features Available!',
-          'Check out our new profile and notification screens. Tap on the tabs below to explore.',
+          'NewFeature Tap on the tabs below to explore.',
           [{ text: 'OK', onPress: () => featureFlagsService.setFlag('showNewFeaturePopup', false) }]
         );
       }, 1500);
@@ -91,7 +89,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Welcome to CodePush Test App for BurakO</Text>
+        <Text style={styles.title}>Welcome to CodePush Test App for BOBO</Text>
         <Text style={styles.subtitle}>Current Version: {currentVersion}</Text>
         
         {updateAvailable && (
