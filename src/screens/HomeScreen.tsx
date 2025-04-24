@@ -32,7 +32,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       (syncStatus) => {
         if (syncStatus === CodePush.SyncStatus.UPDATE_INSTALLED) {
           setSnackbarVisible(true);
-        } else if (syncStatus === CodePush.SyncStatus.AVAILABLE_UPDATE) {
+        } else if (syncStatus === CodePush.SyncStatus.CHECKING_FOR_UPDATE) {
           setUpdateAvailable(true);
         }
       }
