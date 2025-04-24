@@ -43,7 +43,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       setTimeout(() => {
         Alert.alert(
           'New Features Available!',
-          'NewFeature Tap on the tabs below to explore.',
+          'NewFeature NewFeature NewFeature Tap on the tabs below to explore.',
           [{ text: 'OK', onPress: () => featureFlagsService.setFlag('showNewFeaturePopup', false) }]
         );
       }, 1500);
