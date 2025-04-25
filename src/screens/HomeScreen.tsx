@@ -41,15 +41,15 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     analyticsService.trackScreenView('Home');
     
     // Show new feature popup if enabled
-    if (featureFlagsService.isEnabled('showNewFeaturePopup')) {
-      setTimeout(() => {
-        Alert.alert(
-          'New Features Available!',
-          'Check out our new profile and notification screens. Tap on the tabs below to explore.',
-          [{ text: 'OK', onPress: () => featureFlagsService.setFlag('showNewFeaturePopup', false) }]
-        );
-      }, 1500);
-    }
+    // if (featureFlagsService.isEnabled('showNewFeaturePopup')) {
+    //   setTimeout(() => {
+    //     Alert.alert(
+    //       'New Features Available!',
+    //       'Check out our new profile and notification screens. Tap on the tabs below to explore.',
+    //       [{ text: 'OK', onPress: () => featureFlagsService.setFlag('showNewFeaturePopup', false) }]
+    //     );
+    //   }, 1500);
+    // }
   }, []);
 
   const checkForUpdates = () => {
