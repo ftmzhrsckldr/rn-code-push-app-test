@@ -20,6 +20,7 @@ const App: React.FC = () => {
   );
   const [checking, setChecking] = useState<boolean>(false);
   const [spinnerText, setSpinnerText] = useState<string>('Checking for updates…');
+  const isMandatoryRef = React.useRef(false);
 
   useEffect(() => {
     // Initialize analytics
@@ -31,10 +32,10 @@ const App: React.FC = () => {
     CodePush.sync(
       {
         installMode: CodePush.InstallMode.ON_NEXT_RESTART,
-        mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
+        mandatoryInstallMode: CodePush.InstallMode.ON_NEXT_RESTART,
         updateDialog: {
-          title: 'Update Available',
-          mandatoryUpdateMessage: 'A new version is available. Please update to continue.',
+          title: 'Mandatory Update Available',
+          mandatoryUpdateMessage: 'A new mandatory version is available. Please update to continue..',
           mandatoryContinueButtonLabel: 'Update Now',
         },
       },
@@ -56,24 +57,34 @@ const App: React.FC = () => {
             break;
 
           case CodePush.SyncStatus.AWAITING_USER_ACTION:
+            isMandatoryRef.current = true;   // mandatory dialog is shown
             setChecking(false);
             break;
 
           case CodePush.SyncStatus.UPDATE_INSTALLED:
-            setChecking(false);
-            Alert.alert(
-              'Update installed',
-              'Press Restart to apply. If you choose Later, the update will be applied on next restart.',
-              [
-                { text: 'Restart', onPress: () => CodePush.restartApp() },
-                { text: 'Later', style: 'cancel' },
-              ],
-            );
+            if (isMandatoryRef.current) {
+              // Mandatory update: show spinner then restart automatically
+              setSpinnerText('Restarting app…');
+              setChecking(true);
+              isMandatoryRef.current = false;
+              setTimeout(() => CodePush.restartApp(), 800);
+            } else {
+              // Optional update: ask the user
+              setChecking(false);
+              Alert.alert(
+                'Update installed',
+                'Press Restart to apply. If you choose Later, the update will be applied on next restart.',
+                [
+                  { text: 'Restart', onPress: () => CodePush.restartApp() },
+                  { text: 'Later', style: 'cancel' },
+                ],
+              );
+            }
             break;
 
           case CodePush.SyncStatus.UP_TO_DATE:
             setChecking(false);
-            Alert.alert('Your app is up to date ✅');
+            Alert.alert('Your app is up to date ✅\n Continue using the app.');
             break;
 
           case CodePush.SyncStatus.UNKNOWN_ERROR:
@@ -140,7 +151,9 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CodePush({
-  checkFrequency: CodePush.CheckFrequency.ON_APP_START,
-  installMode: CodePush.InstallMode.ON_NEXT_RESTART,
-})(App);
+// export default CodePush({
+//   checkFrequency: CodePush.CheckFrequency.ON_APP_START,
+//   installMode: CodePush.InstallMode.ON_NEXT_RESTART,
+// })(App);
+
+export default App;
