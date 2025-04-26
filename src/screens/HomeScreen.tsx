@@ -18,38 +18,41 @@ import { version as currentVersion } from '../../package.json';
 import CodePush from '@appcircle/react-native-code-push';
 import Snackbar from '../components/common/snackbar';
 import { featureFlagsService } from '../utils/featureFlags';
+import { ActivityIndicator, Modal } from 'react-native';
+
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
-  
+  const [checking, setChecking] = useState(false);
+
   useEffect(() => {
     // Check for CodePush updates
     CodePush.sync(
       {
-        installMode: CodePush.InstallMode.IMMEDIATE,
+        installMode: CodePush.InstallMode.ON_NEXT_RESTART,
       },
       (syncStatus) => {
         if (syncStatus === CodePush.SyncStatus.UPDATE_INSTALLED) {
           setSnackbarVisible(true);
         } else if (syncStatus === CodePush.SyncStatus.CHECKING_FOR_UPDATE) {
-          setUpdateAvailable(true);
+          Alert.alert('Checking for updates...');
         }
       }
     );
-    
+
     analyticsService.trackScreenView('Home');
-    
+
     // Show new feature popup if enabled
-    // if (featureFlagsService.isEnabled('showNewFeaturePopup')) {
-    //   setTimeout(() => {
-    //     Alert.alert(
-    //       'New Features Available!',
-    //       'Check out our new profile and notification screens. Tap on the tabs below to explore.',
-    //       [{ text: 'OK', onPress: () => featureFlagsService.setFlag('showNewFeaturePopup', false) }]
-    //     );
-    //   }, 1500);
-    // }
+    if (featureFlagsService.isEnabled('showNewFeaturePopup')) {
+      setTimeout(() => {
+        Alert.alert(
+          'New Features Available!',
+          'Check out our new profile and notification screens. Tap on the tabs below to explore.',
+          [{ text: 'OK', onPress: () => featureFlagsService.setFlag('showNewFeaturePopup', false) }]
+        );
+      }, 1500);
+    }
   }, []);
 
   const checkForUpdates = () => {
@@ -58,15 +61,22 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         installMode: CodePush.InstallMode.ON_NEXT_RESTART,
       },
       (syncStatus) => {
-        switch(syncStatus) {
+        switch (syncStatus) {
           case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
-            Alert.alert('Checking for updates...');
+            setChecking(true);
             break;
           case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-            Alert.alert('Downloading update...');
+            setChecking(false);
             break;
           case CodePush.SyncStatus.INSTALLING_UPDATE:
-            Alert.alert('Installing update...');
+            Alert.alert(
+              'Update installed',
+              'Please the app to apply the changes.',
+              [
+                { text: 'Restart', onPress: () => CodePush.restartApp() },
+                { text: 'Later', style: 'cancel' },
+              ],
+            );
             break;
           case CodePush.SyncStatus.UPDATE_INSTALLED:
             setSnackbarVisible(true);
@@ -80,42 +90,42 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         }
       }
     );
-    
+
     analyticsService.trackEvent('check_for_updates');
   };
 
   return (
-    <ScrollView 
+    <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Welcome to CodePush Test App</Text>
+        <Text style={styles.title}>Welcome to CodePush Test App for rollout, rollout 20</Text>
         <Text style={styles.subtitle}>Current Version: {currentVersion}</Text>
-        
+
         {updateAvailable && (
-          <Button 
-            title="Update Available!" 
+          <Button
+            title="Update Available!"
             variant="primary"
             onPress={checkForUpdates}
             style={styles.updateButton}
           />
         )}
       </View>
-      
+
       <Card title="App Features" style={styles.card}>
         <Text style={styles.cardText}>
           This app demonstrates CodePush integration for over-the-air updates.
           Navigate using the tabs below to explore different sections.
         </Text>
       </Card>
-      
+
       <View style={styles.shortcuts}>
         <Text style={styles.sectionTitle}>Quick Access</Text>
-        
+
         <View style={styles.shortcutGrid}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.shortcutItem}
             onPress={() => {
               navigation.navigate('Feed');
@@ -127,8 +137,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             </View>
             <Text style={styles.shortcutText}>Feed</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.shortcutItem}
             onPress={() => {
               navigation.navigate('Notifications');
@@ -140,8 +150,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             </View>
             <Text style={styles.shortcutText}>Notifications</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.shortcutItem}
             onPress={() => {
               navigation.navigate('Profile');
@@ -153,8 +163,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             </View>
             <Text style={styles.shortcutText}>Profile</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.shortcutItem}
             onPress={() => {
               checkForUpdates();
@@ -168,7 +178,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </View>
-      
+
       <View style={styles.codeSection}>
         <Text style={styles.sectionTitle}>About CodePush</Text>
         <Card style={styles.card}>
@@ -178,7 +188,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             central repository where developers can publish updates, and from which apps
             can retrieve them using the provided SDK.
           </Text>
-          <Button 
+          <Button
             title="Learn More"
             variant="outline"
             size="small"
@@ -190,7 +200,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           />
         </Card>
       </View>
-      
+
       <Snackbar
         visible={snackbarVisible}
         message="The app has been updated. Please restart to apply changes."
