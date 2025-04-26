@@ -31,6 +31,12 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     CodePush.sync(
       {
         installMode: CodePush.InstallMode.ON_NEXT_RESTART,
+        mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
+        updateDialog: {
+          title: 'Update Available',
+          mandatoryUpdateMessage: 'A new version is available. Please update to continue.',
+          mandatoryContinueButtonLabel: 'Update Now',
+        },
       },
       (syncStatus) => {
         if (syncStatus === CodePush.SyncStatus.UPDATE_INSTALLED) {
