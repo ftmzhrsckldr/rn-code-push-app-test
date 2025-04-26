@@ -25,6 +25,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [spinnerText, setSpinnerText] = useState('Checking for updates…');
 
   useEffect(() => {
     // Check for CodePush updates
@@ -39,26 +40,65 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         },
       },
       (syncStatus) => {
-        if (syncStatus === CodePush.SyncStatus.UPDATE_INSTALLED) {
-          setSnackbarVisible(true);
-        } else if (syncStatus === CodePush.SyncStatus.CHECKING_FOR_UPDATE) {
-          Alert.alert('Checking for updates...');
+        checkForUpdates
+        switch (syncStatus) {
+          case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
+            setSpinnerText('Checking for updates…');
+            setChecking(true);                       // show spinner
+            break;
+
+          case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+            setSpinnerText('Downloading update…');
+            setChecking(true);
+            break;
+
+          case CodePush.SyncStatus.INSTALLING_UPDATE:
+            setSpinnerText('Installing update…');
+            setChecking(true);
+            break;
+
+          case CodePush.SyncStatus.AWAITING_USER_ACTION:
+            // updateDialog open – spinner already hidden by dialog backdrop
+            setChecking(false);
+            break;
+
+          case CodePush.SyncStatus.UPDATE_INSTALLED:
+            setChecking(false);
+            Alert.alert(
+              'Update installed',
+              'Press Restart to apply. If you choose Later, the update will be applied on next restart.',
+              [
+                { text: 'Restart', onPress: () => CodePush.restartApp() },
+                { text: 'Later', style: 'cancel' },
+              ],
+            );
+            break;
+
+          case CodePush.SyncStatus.UP_TO_DATE:
+            setChecking(false);
+            // Optionally inform the user once per session
+            Alert.alert('Your app is up to date ✅');
+            break;
+
+          case CodePush.SyncStatus.UNKNOWN_ERROR:
+            setChecking(false);
+            Alert.alert('Error while checking updates');
+            break;
         }
       }
     );
 
     analyticsService.trackScreenView('Home');
 
-    // Show new feature popup if enabled
-    if (featureFlagsService.isEnabled('showNewFeaturePopup')) {
-      setTimeout(() => {
-        Alert.alert(
-          'New Features Available!',
-          'Check out our new profile and notification screens. Tap on the tabs below to explore.',
-          [{ text: 'OK', onPress: () => featureFlagsService.setFlag('showNewFeaturePopup', false) }]
-        );
-      }, 1500);
-    }
+    // if (featureFlagsService.isEnabled('showNewFeaturePopup')) {
+    //   setTimeout(() => {
+    //     Alert.alert(
+    //       'New Features Available!',
+    //       'Check out our new profile and notification screens. Tap on the tabs below to explore.',
+    //       [{ text: 'OK', onPress: () => featureFlagsService.setFlag('showNewFeaturePopup', false) }]
+    //     );
+    //   }, 1000);
+    // }
   }, []);
 
   const checkForUpdates = () => {
@@ -69,28 +109,34 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       (syncStatus) => {
         switch (syncStatus) {
           case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
+            setSpinnerText('Checking for updates…');
             setChecking(true);
             break;
           case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-            setChecking(false);
+            setSpinnerText('Downloading update…');
+            setChecking(true);
             break;
           case CodePush.SyncStatus.INSTALLING_UPDATE:
+            setSpinnerText('Installing update…');
+            setChecking(true);
+            break;
+          case CodePush.SyncStatus.UPDATE_INSTALLED:
+            setChecking(false);
             Alert.alert(
               'Update installed',
-              'Please the app to apply the changes.',
+              'Please restart the app to apply the update. If you choose Later, the update will be applied on next restart.',
               [
                 { text: 'Restart', onPress: () => CodePush.restartApp() },
                 { text: 'Later', style: 'cancel' },
               ],
             );
             break;
-          case CodePush.SyncStatus.UPDATE_INSTALLED:
-            setSnackbarVisible(true);
-            break;
           case CodePush.SyncStatus.UP_TO_DATE:
+            setChecking(false);
             Alert.alert('App is up to date!');
             break;
           case CodePush.SyncStatus.UNKNOWN_ERROR:
+            setChecking(false);
             Alert.alert('An error occurred while checking for updates');
             break;
         }
@@ -107,7 +153,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Welcome to CodePush Test App for rollout, rollout 20</Text>
+        <Text style={styles.title}>Welcome to CodePush Test App, v24 CodePush</Text>
         <Text style={styles.subtitle}>Current Version: {currentVersion}</Text>
 
         {updateAvailable && (
@@ -216,6 +262,16 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         autoHide={false}
         swipeToDismiss
       />
+
+      {/* Spinner while checking/downloading/installing updates */}
+      <Modal visible={checking} transparent animationType="fade">
+        <View style={{ flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'rgba(0,0,0,0.6)' }}>
+          <View style={{ padding:24, borderRadius:12, backgroundColor:'rgba(0,0,0,0.8)', alignItems:'center' }}>
+            <ActivityIndicator size="large" color="#ffffff" style={{ marginBottom:16 }} />
+            <Text style={{ color:'#ffffff', fontSize:16, fontWeight:'600' }}>{spinnerText}</Text>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
