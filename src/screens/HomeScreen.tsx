@@ -29,64 +29,64 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   useEffect(() => {
     // Check for CodePush updates
-    CodePush.sync(
-      {
-        installMode: CodePush.InstallMode.ON_NEXT_RESTART,
-        mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
-        updateDialog: {
-          title: 'Update Available',
-          mandatoryUpdateMessage: 'A new version is available. Please update to continue.',
-          mandatoryContinueButtonLabel: 'Update Now',
-        },
-      },
-      (syncStatus) => {
-        checkForUpdates
-        switch (syncStatus) {
-          case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
-            setSpinnerText('Checking for updates…');
-            setChecking(true);                       // show spinner
-            break;
+    // CodePush.sync(
+    //   {
+    //     installMode: CodePush.InstallMode.ON_NEXT_RESTART,
+    //     mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
+    //     updateDialog: {
+    //       title: 'Update Available',
+    //       mandatoryUpdateMessage: 'A new version is available. Please update to continue.',
+    //       mandatoryContinueButtonLabel: 'Update Now',
+    //     },
+    //   },
+    //   (syncStatus) => {
+    //     checkForUpdates
+    //     switch (syncStatus) {
+    //       case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
+    //         setSpinnerText('Checking for updates…');
+    //         setChecking(true);                       // show spinner
+    //         break;
 
-          case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-            setSpinnerText('Downloading update…');
-            setChecking(true);
-            break;
+    //       case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+    //         setSpinnerText('Downloading update…');
+    //         setChecking(true);
+    //         break;
 
-          case CodePush.SyncStatus.INSTALLING_UPDATE:
-            setSpinnerText('Installing update…');
-            setChecking(true);
-            break;
+    //       case CodePush.SyncStatus.INSTALLING_UPDATE:
+    //         setSpinnerText('Installing update…');
+    //         setChecking(true);
+    //         break;
 
-          case CodePush.SyncStatus.AWAITING_USER_ACTION:
-            // updateDialog open – spinner already hidden by dialog backdrop
-            setChecking(false);
-            break;
+    //       case CodePush.SyncStatus.AWAITING_USER_ACTION:
+    //         // updateDialog open – spinner already hidden by dialog backdrop
+    //         setChecking(false);
+    //         break;
 
-          case CodePush.SyncStatus.UPDATE_INSTALLED:
-            setChecking(false);
-            Alert.alert(
-              'Update installed',
-              'Press Restart to apply. If you choose Later, the update will be applied on next restart.',
-              [
-                { text: 'Restart', onPress: () => CodePush.restartApp() },
-                { text: 'Later', style: 'cancel' },
-              ],
-            );
-            break;
+    //       case CodePush.SyncStatus.UPDATE_INSTALLED:
+    //         setChecking(false);
+    //         Alert.alert(
+    //           'Update installed',
+    //           'Press Restart to apply. If you choose Later, the update will be applied on next restart.',
+    //           [
+    //             { text: 'Restart', onPress: () => CodePush.restartApp() },
+    //             { text: 'Later', style: 'cancel' },
+    //           ],
+    //         );
+    //         break;
 
-          case CodePush.SyncStatus.UP_TO_DATE:
-            setChecking(false);
-            // Optionally inform the user once per session
-            Alert.alert('Your app is up to date ✅');
-            break;
+    //       case CodePush.SyncStatus.UP_TO_DATE:
+    //         setChecking(false);
+    //         // Optionally inform the user once per session
+    //         Alert.alert('Your app is up to date ✅');
+    //         break;
 
-          case CodePush.SyncStatus.UNKNOWN_ERROR:
-            setChecking(false);
-            Alert.alert('Error while checking updates');
-            break;
-        }
-      }
-    );
+    //       case CodePush.SyncStatus.UNKNOWN_ERROR:
+    //         setChecking(false);
+    //         Alert.alert('Error while checking updates');
+    //         break;
+    //     }
+    //   }
+    // );
 
     analyticsService.trackScreenView('Home');
 
@@ -153,7 +153,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Welcome to CodePush Test App, v24 CodePush</Text>
+        <Text style={styles.title}>Welcome to CodePush Test App</Text>
         <Text style={styles.subtitle}>Current Version: {currentVersion}</Text>
 
         {updateAvailable && (
