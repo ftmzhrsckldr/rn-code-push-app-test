@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@appcircle/react-native-code-push": "0.0.2-alpha.3",
+    "@react-native-community/push-notification-ios": "^1.11.0",
     "@react-navigation/bottom-tabs": "^6.5.14",
     "@react-navigation/native": "^6.1.12",
     "@react-navigation/native-stack": "^6.9.20",
