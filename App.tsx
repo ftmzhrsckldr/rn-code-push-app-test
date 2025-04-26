@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet, LogBox, Modal, View, ActivityIndicator, Text, Alert } from 'react-native';
+import PushNotification from 'react-native-push-notification';
 import CodePush from '@appcircle/react-native-code-push';
 import Navigation from './src/navigation';
 import { colors } from './src/theme/colors';
@@ -27,6 +28,20 @@ const App: React.FC = () => {
     analyticsService.startNewSession();
     analyticsService.setEnabled(featureFlagsService.isEnabled('enableAnalytics'));
     analyticsService.trackEvent('app_launched');
+
+    // --- Local notification setup (runs once) ---
+    PushNotification.configure({
+      requestPermissions: true,
+      onNotification: () => {},
+    });
+    PushNotification.createChannel(
+      {
+        channelId: 'updates',
+        channelName: 'Updates',
+        importance: 4,
+      },
+      () => {},
+    );
 
     // Check for CodePush updates
     CodePush.sync(
@@ -62,6 +77,13 @@ const App: React.FC = () => {
             break;
 
           case CodePush.SyncStatus.UPDATE_INSTALLED:
+            PushNotification.localNotification({
+              channelId: 'updates',
+              title: 'New version installed',
+              message: 'Please click to restart the app',
+              playSound: true,
+              invokeApp: true,
+            });
             if (isMandatoryRef.current) {
               // Mandatory update: show spinner then restart automatically
               setSpinnerText('Restarting app…');
@@ -83,6 +105,12 @@ const App: React.FC = () => {
             break;
 
           case CodePush.SyncStatus.UP_TO_DATE:
+            PushNotification.localNotification({
+              channelId: 'updates',
+              title: 'App is up to date',
+              message: 'Latest version is already installed',
+              playSound: false,
+            });
             setChecking(false);
             Alert.alert('Your app is up to date ✅\n Continue using the app.');
             break;
