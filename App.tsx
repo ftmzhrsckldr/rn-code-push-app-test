@@ -57,7 +57,7 @@ const App: React.FC = () => {
             break;
 
           case CodePush.SyncStatus.AWAITING_USER_ACTION:
-            isMandatoryRef.current = true;   // mandatory dialog is shown
+            isMandatoryRef.current = true;
             setChecking(false);
             break;
 
