@@ -22,6 +22,8 @@ const App: React.FC = () => {
     analyticsService.startNewSession();
     analyticsService.setEnabled(featureFlagsService.isEnabled('enableAnalytics'));
     analyticsService.trackEvent('app_launched');
+    
+    // Notify CodePush that the app is ready
     CodePush.notifyAppReady();
     
     // Check for CodePush updates
@@ -30,8 +32,8 @@ const App: React.FC = () => {
         installMode: CodePush.InstallMode.ON_NEXT_RESTART,
         mandatoryInstallMode: CodePush.InstallMode.ON_NEXT_RESTART,
         updateDialog: {
-          title: 'Mandatory Update Available',
-          mandatoryUpdateMessage: 'A new mandatory version is available. Please update to continue..',
+          title: 'Update Available',
+          mandatoryUpdateMessage: 'A new version is available. Please update to continue.',
           mandatoryContinueButtonLabel: 'Update Now',
         },
       },
@@ -142,7 +144,15 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CodePush({
-  checkFrequency: CodePush.CheckFrequency.ON_APP_START,
-  installMode: CodePush.InstallMode.ON_NEXT_RESTART,
-})(App);
+// export default CodePush({
+//   checkFrequency: CodePush.CheckFrequency.ON_APP_START,
+//   installMode: CodePush.InstallMode.IMMEDIATE,
+//   mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
+//   updateDialog: {
+//     title: 'Update Available',
+//     mandatoryUpdateMessage: 'A new version is available. Please update to continue.',
+//     mandatoryContinueButtonLabel: 'Update Now',
+//   },
+// })(App);
+
+export default App;
