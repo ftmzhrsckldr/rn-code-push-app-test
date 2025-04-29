@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Image,
   Alert,
 } from 'react-native';
 import { colors } from '../theme/colors';
@@ -16,97 +15,28 @@ import Card from '../components/cards/Card';
 import { analyticsService } from '../utils/analytics';
 import { version as currentVersion } from '../../package.json';
 import CodePush from '@appcircle/react-native-code-push';
-import Snackbar from '../components/common/snackbar';
 import { featureFlagsService } from '../utils/featureFlags';
 import { ActivityIndicator, Modal } from 'react-native';
 
-
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [updateAvailable, setUpdateAvailable] = useState(false);
   const [checking, setChecking] = useState(false);
   const [spinnerText, setSpinnerText] = useState('Checking for updates…');
 
   useEffect(() => {
-    // Inform CodePush that the update was applied successfully (avoids Android rollback)
     CodePush.notifyAppReady();
-    // Check for CodePush updates
-    // CodePush.sync(
-    //   {
-    //     installMode: CodePush.InstallMode.ON_NEXT_RESTART,
-    //     mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
-    //     updateDialog: {
-    //       title: 'Update Available',
-    //       mandatoryUpdateMessage: 'A new version is available. Please update to continue.',
-    //       mandatoryContinueButtonLabel: 'Update Now',
-    //     },
-    //   },
-    //   (syncStatus) => {
-    //     checkForUpdates
-    //     switch (syncStatus) {
-    //       case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
-    //         setSpinnerText('Checking for updates…');
-    //         setChecking(true);                       // show spinner
-    //         break;
-
-    //       case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-    //         setSpinnerText('Downloading update…');
-    //         setChecking(true);
-    //         break;
-
-    //       case CodePush.SyncStatus.INSTALLING_UPDATE:
-    //         setSpinnerText('Installing update…');
-    //         setChecking(true);
-    //         break;
-
-    //       case CodePush.SyncStatus.AWAITING_USER_ACTION:
-    //         // updateDialog open – spinner already hidden by dialog backdrop
-    //         setChecking(false);
-    //         break;
-
-    //       case CodePush.SyncStatus.UPDATE_INSTALLED:
-    //         setChecking(false);
-    //         Alert.alert(
-    //           'Update installed',
-    //           'Press Restart to apply. If you choose Later, the update will be applied on next restart.',
-    //           [
-    //             { text: 'Restart', onPress: () => CodePush.restartApp() },
-    //             { text: 'Later', style: 'cancel' },
-    //           ],
-    //         );
-    //         break;
-
-    //       case CodePush.SyncStatus.UP_TO_DATE:
-    //         setChecking(false);
-    //         // Optionally inform the user once per session
-    //         Alert.alert('Your app is up to date ✅');
-    //         break;
-
-    //       case CodePush.SyncStatus.UNKNOWN_ERROR:
-    //         setChecking(false);
-    //         Alert.alert('Error while checking updates');
-    //         break;
-    //     }
-    //   }
-    // );
-
     analyticsService.trackScreenView('Home');
-
-    // if (featureFlagsService.isEnabled('showNewFeaturePopup')) {
-    //   setTimeout(() => {
-    //     Alert.alert(
-    //       'New Features Available!',
-    //       'Check out our new profile and notification screens. Tap on the tabs below to explore.',
-    //       [{ text: 'OK', onPress: () => featureFlagsService.setFlag('showNewFeaturePopup', false) }]
-    //     );
-    //   }, 1000);
-    // }
   }, []);
 
   const checkForUpdates = () => {
     CodePush.sync(
       {
         installMode: CodePush.InstallMode.ON_NEXT_RESTART,
+        mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
+        updateDialog: {
+          title: 'Update Available',
+          mandatoryUpdateMessage: 'A new version is available. Please update to continue.',
+          mandatoryContinueButtonLabel: 'Update Now',
+        },
       },
       (syncStatus) => {
         switch (syncStatus) {
@@ -155,17 +85,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Appcircle CodePush Test 29 Apr, Android new push tests v3</Text>
+        <Text style={styles.title}>Appcircle CodePush Test 29 Apr, 29Apr 15299</Text>
         <Text style={styles.subtitle}>Current Version: {currentVersion}</Text>
-
-        {updateAvailable && (
-          <Button
-            title="Update Available!"
-            variant="primary"
-            onPress={checkForUpdates}
-            style={styles.updateButton}
-          />
-        )}
       </View>
 
       <Card title="App Features" style={styles.card}>
@@ -255,16 +176,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </Card>
       </View>
 
-      <Snackbar
-        visible={snackbarVisible}
-        message="The app has been updated. Please restart to apply changes."
-        onDismiss={() => setSnackbarVisible(false)}
-        actionLabel="Restart"
-        onActionPress={() => CodePush.restartApp()}
-        autoHide={false}
-        swipeToDismiss
-      />
-
       {/* Spinner while checking/downloading/installing updates */}
       <Modal visible={checking} transparent animationType="fade">
         <View style={{ flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'rgba(0,0,0,0.6)' }}>
@@ -302,9 +213,6 @@ const styles = StyleSheet.create({
     color: colors.gray,
     marginTop: spacing.xs,
     textAlign: 'center',
-  },
-  updateButton: {
-    marginTop: spacing.md,
   },
   card: {
     marginBottom: spacing.lg,
