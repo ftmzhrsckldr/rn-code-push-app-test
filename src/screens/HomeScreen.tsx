@@ -28,6 +28,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [spinnerText, setSpinnerText] = useState('Checking for updates…');
 
   useEffect(() => {
+    // Inform CodePush that the update was applied successfully (avoids Android rollback)
+    CodePush.notifyAppReady();
     // Check for CodePush updates
     // CodePush.sync(
     //   {
@@ -153,7 +155,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Appcircle CodePush Test 29 Apr</Text>
+        <Text style={styles.title}>Appcircle CodePush Test 29 Apr, Android new push tests v3</Text>
         <Text style={styles.subtitle}>Current Version: {currentVersion}</Text>
 
         {updateAvailable && (
