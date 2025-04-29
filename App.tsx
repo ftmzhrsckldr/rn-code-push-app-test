@@ -27,7 +27,7 @@ const App: React.FC = () => {
     analyticsService.startNewSession();
     analyticsService.setEnabled(featureFlagsService.isEnabled('enableAnalytics'));
     analyticsService.trackEvent('app_launched');
-
+    CodePush.notifyAppReady();
     // Check for CodePush updates
     CodePush.sync(
       {
