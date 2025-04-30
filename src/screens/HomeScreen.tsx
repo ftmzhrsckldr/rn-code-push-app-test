@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Image,
   Alert,
 } from 'react-native';
 import { colors } from '../theme/colors';
@@ -15,15 +16,18 @@ import Card from '../components/cards/Card';
 import { analyticsService } from '../utils/analytics';
 import { version as currentVersion } from '../../package.json';
 import CodePush from '@appcircle/react-native-code-push';
+import Snackbar from '../components/common/snackbar';
 import { featureFlagsService } from '../utils/featureFlags';
 import { ActivityIndicator, Modal } from 'react-native';
 
+
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
   const [checking, setChecking] = useState(false);
   const [spinnerText, setSpinnerText] = useState('Checking for updates…');
 
   useEffect(() => {
-    CodePush.notifyAppReady();
     analyticsService.trackScreenView('Home');
   }, []);
 
@@ -31,12 +35,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     CodePush.sync(
       {
         installMode: CodePush.InstallMode.ON_NEXT_RESTART,
-        mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
-        updateDialog: {
-          title: 'Update Available',
-          mandatoryUpdateMessage: 'A new version is available. Please update to continue.',
-          mandatoryContinueButtonLabel: 'Update Now',
-        },
       },
       (syncStatus) => {
         switch (syncStatus) {
@@ -85,8 +83,17 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Appcircle CodePush Test 29 Apr, 29Apr 15299</Text>
+        <Text style={styles.title}>Appcircle CodePush 30 Apr Test</Text>
         <Text style={styles.subtitle}>Current Version: {currentVersion}</Text>
+
+        {updateAvailable && (
+          <Button
+            title="Update Available!"
+            variant="primary"
+            onPress={checkForUpdates}
+            style={styles.updateButton}
+          />
+        )}
       </View>
 
       <Card title="App Features" style={styles.card}>
@@ -176,6 +183,16 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </Card>
       </View>
 
+      <Snackbar
+        visible={snackbarVisible}
+        message="The app has been updated. Please restart to apply changes."
+        onDismiss={() => setSnackbarVisible(false)}
+        actionLabel="Restart"
+        onActionPress={() => CodePush.restartApp()}
+        autoHide={false}
+        swipeToDismiss
+      />
+
       {/* Spinner while checking/downloading/installing updates */}
       <Modal visible={checking} transparent animationType="fade">
         <View style={{ flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'rgba(0,0,0,0.6)' }}>
@@ -213,6 +230,9 @@ const styles = StyleSheet.create({
     color: colors.gray,
     marginTop: spacing.xs,
     textAlign: 'center',
+  },
+  updateButton: {
+    marginTop: spacing.md,
   },
   card: {
     marginBottom: spacing.lg,

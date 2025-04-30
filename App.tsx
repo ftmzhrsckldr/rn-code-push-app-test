@@ -3,6 +3,7 @@ import { SafeAreaView, StatusBar, StyleSheet, LogBox, Modal, View, ActivityIndic
 import CodePush from '@appcircle/react-native-code-push';
 import Navigation from './src/navigation';
 import { colors } from './src/theme/colors';
+import Snackbar from './src/components/common/snackbar';
 import { analyticsService } from './src/utils/analytics';
 import { featureFlagsService } from './src/utils/featureFlags';
 
@@ -13,27 +14,28 @@ LogBox.ignoreLogs([
 ]);
 
 const App: React.FC = () => {
+  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
+  const [updateMessage, setUpdateMessage] = useState<string>(
+    'The app has been updated. Please restart to apply changes.'
+  );
   const [checking, setChecking] = useState<boolean>(false);
   const [spinnerText, setSpinnerText] = useState<string>('Checking for updates…');
-  const [isMandatory, setIsMandatory] = useState<boolean>(false);
+  const isMandatoryRef = React.useRef(false);
 
   useEffect(() => {
     // Initialize analytics
     analyticsService.startNewSession();
     analyticsService.setEnabled(featureFlagsService.isEnabled('enableAnalytics'));
     analyticsService.trackEvent('app_launched');
-    
-    // Notify CodePush that the app is ready
-    CodePush.notifyAppReady();
-    
+
     // Check for CodePush updates
     CodePush.sync(
       {
         installMode: CodePush.InstallMode.ON_NEXT_RESTART,
         mandatoryInstallMode: CodePush.InstallMode.ON_NEXT_RESTART,
         updateDialog: {
-          title: 'Update Available',
-          mandatoryUpdateMessage: 'A new version is available. Please update to continue.',
+          title: 'Mandatory Update Available',
+          mandatoryUpdateMessage: 'A new mandatory version is available. Please update to continue..',
           mandatoryContinueButtonLabel: 'Update Now',
         },
       },
@@ -55,17 +57,19 @@ const App: React.FC = () => {
             break;
 
           case CodePush.SyncStatus.AWAITING_USER_ACTION:
-            setIsMandatory(true);
+            isMandatoryRef.current = true;   // mandatory dialog is shown
             setChecking(false);
             break;
 
           case CodePush.SyncStatus.UPDATE_INSTALLED:
-            if (isMandatory) {
+            if (isMandatoryRef.current) {
+              // Mandatory update: show spinner then restart automatically
               setSpinnerText('Restarting app…');
               setChecking(true);
-              setIsMandatory(false);
-              CodePush.restartApp();
+              isMandatoryRef.current = false;
+              setTimeout(() => CodePush.restartApp(), 800);
             } else {
+              // Optional update: ask the user
               setChecking(false);
               Alert.alert(
                 'Update installed',
@@ -85,15 +89,10 @@ const App: React.FC = () => {
 
           case CodePush.SyncStatus.UNKNOWN_ERROR:
             setChecking(false);
-            Alert.alert('Error', 'Failed to check for updates. Please try again later.');
+            Alert.alert('Error while checking updates');
             break;
         }
       },
-      (error) => {
-        console.error('CodePush sync error:', error);
-        setChecking(false);
-        Alert.alert('Error', 'Failed to check for updates. Please try again later.');
-      }
     );
 
     // Check update status
@@ -109,7 +108,6 @@ const App: React.FC = () => {
         }
       } catch (error) {
         console.error('Error checking update status:', error);
-        Alert.alert('Error', 'Failed to check update status. Please try again later.');
       }
     };
 
@@ -124,6 +122,15 @@ const App: React.FC = () => {
       />
       <Navigation />
       
+      <Snackbar
+        visible={snackbarVisible}
+        message={updateMessage}
+        onDismiss={() => setSnackbarVisible(false)}
+        actionLabel="Restart"
+        onActionPress={() => CodePush.restartApp()}
+        autoHide={false}
+        swipeToDismiss
+      />
       {/* Spinner while checking/downloading/installing updates */}
       <Modal visible={checking} transparent animationType="fade">
         <View style={{ flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'rgba(0,0,0,0.6)' }}>
@@ -146,13 +153,7 @@ const styles = StyleSheet.create({
 
 // export default CodePush({
 //   checkFrequency: CodePush.CheckFrequency.ON_APP_START,
-//   installMode: CodePush.InstallMode.IMMEDIATE,
-//   mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
-//   updateDialog: {
-//     title: 'Update Available',
-//     mandatoryUpdateMessage: 'A new version is available. Please update to continue.',
-//     mandatoryContinueButtonLabel: 'Update Now',
-//   },
+//   installMode: CodePush.InstallMode.ON_NEXT_RESTART,
 // })(App);
 
 export default App;
