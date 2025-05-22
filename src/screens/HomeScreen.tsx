@@ -85,7 +85,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Appcircle CodePush Test 22 May 12:32</Text>
+        <Text style={styles.title}>Appcircle CodePush Test 22 May 12:42</Text>
         <Text style={styles.subtitle}>Current Version: {currentVersion}</Text>
       </View>
 
